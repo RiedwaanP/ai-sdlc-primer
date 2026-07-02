@@ -1,0 +1,52 @@
+# Example CI enforcing the framework's gates. POPULATE commands per stack pack.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  quality-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Setup toolchain
+        run: echo "POPULATE: setup-node/setup-python/etc."
+
+      - name: Secret scan (fail closed)
+        uses: gitleaks/gitleaks-action@v2
+
+      - name: Lint
+        run: <LINT_CMD>
+
+      - name: Typecheck
+        run: <TYPECHECK_CMD>
+
+      - name: Tests + coverage floor
+        run: <TEST_CMD> # must fail if coverage < COVERAGE_TARGET
+
+      - name: Dependency audit (critical CVEs fail)
+        run: echo "POPULATE: npm audit --audit-level=critical | pip-audit | cargo audit"
+
+      - name: Spec traceability check
+        # Every changed src file's PR must reference a spec (soft check: PR title/body contains 'Spec NNN')
+        run: |
+          if ! echo "${{ github.event.pull_request.title }} ${{ github.event.pull_request.body }}" | grep -qE 'Spec [0-9]+'; then
+            echo "::error::PR must reference its spec (e.g. 'Spec 004')"; exit 1
+          fi
+        if: github.event_name == 'pull_request'
+
+      # UI stacks only:
+      # - name: Accessibility checks
+      #   run: <A11Y_CMD>
+
+  # Optional: AI review-gate in CI — run the reviewer role headless on the diff.
+  # Works with any headless-capable harness; examples:
+  #   Claude Code:  claude -p "Adopt agents/reviewer.md. Review this PR's diff vs its spec and constitution.md. Output VERDICT." --allowedTools "Read,Grep,Glob,Bash(git diff:*)"
+  #   Codex CLI:    codex exec "Adopt agents/reviewer.md. Review this PR's diff vs its spec and constitution.md. Output VERDICT."
+  #   Gemini CLI:   gemini -p "Adopt agents/reviewer.md. Review this PR's diff vs its spec and constitution.md. Output VERDICT."
+  # Use a Plan-tier model; fail the job unless output contains "VERDICT: APPROVE".
+  # Requires the provider API key (or gateway key) as a repo secret.

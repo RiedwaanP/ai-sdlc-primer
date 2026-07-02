@@ -1,0 +1,22 @@
+# One extended-regex per line, matched against repo-relative paths.
+# Used by guardrails/pre-commit and pipeline CI. Lines starting with # are ignored.
+(^|/)\.env($|\.)
+(^|/)secrets/
+(^|/)constitution\.md$
+(^|/)AGENTS\.md$
+(^|/)guardrails/
+(^|/)agents/
+(^|/)\.claude/
+(^|/)\.github/copilot
+(^|/)\.cursor/
+(^|/)\.codex/
+(^|/)\.gemini/
+(^|/)GEMINI\.md$
+(^|/)CLAUDE\.md$
+package-lock\.json$
+yarn\.lock$
+pnpm-lock\.yaml$
+Cargo\.lock$
+poetry\.lock$
+uv\.lock$
+go\.sum$

@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Portable git pre-commit hook: blocks protected-path changes, approved-spec edits, and obvious secrets.
+# Install: cp guardrails/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+# Human override (deliberate, visible): ALLOW_PROTECTED=1 git commit ...
+set -euo pipefail
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+PATTERNS_FILE="$REPO_ROOT/guardrails/protected-paths.txt"
+STAGED=$(git diff --cached --name-only --diff-filter=ACMRD)
+
+[ -z "$STAGED" ] && exit 0
+
+fail() { echo "pre-commit BLOCK: $1" >&2; exit 1; }
+
+# 1. Protected paths
+if [ -f "$PATTERNS_FILE" ] && [ "${ALLOW_PROTECTED:-0}" != "1" ]; then
+  while IFS= read -r pattern; do
+    case "$pattern" in ''|\#*) continue;; esac
+    HIT=$(echo "$STAGED" | grep -E "$pattern" || true)
+    [ -n "$HIT" ] && fail "protected path staged ($pattern):
+$HIT
+If you are a human making a deliberate change: ALLOW_PROTECTED=1 git commit ..."
+  done < "$PATTERNS_FILE"
+fi
+
+# 2. Approved specs are immutable
+for f in $(echo "$STAGED" | grep -E '(^|/)specs/[0-9]+-[^/]+/spec\.md$' || true); do
+  if git show "HEAD:$f" 2>/dev/null | grep -qE '^status: *approved' && [ "${ALLOW_PROTECTED:-0}" != "1" ]; then
+    fail "'$f' is an approved spec. Amend via revision bump + status: draft + re-approval."
+  fi
+done
+
+# 3. Cheap secret heuristics (CI runs the real scanner)
+SECRET_REGEX='(AKIA[0-9A-Z]{16}|-----BEGIN (RSA|EC|OPENSSH) PRIVATE KEY-----|sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{36})'
+for f in $STAGED; do
+  [ -f "$REPO_ROOT/$f" ] || continue
+  if git diff --cached -U0 -- "$f" | grep -qE "$SECRET_REGEX"; then
+    fail "possible secret in staged diff of '$f'. Remove it; secrets live in the environment."
+  fi
+done
+
+exit 0
