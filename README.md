@@ -37,6 +37,7 @@ One vendor-neutral core, thin per-harness adapters. The core (specs, standards, 
 | Cursor | ✅ | ◐ rules per glob | ✅ commands | CI only |
 | Codex CLI | ✅ (native) | ◐ via prompt | ✅ custom prompts | CI only |
 | Gemini CLI | ◐ (GEMINI.md, see adapter) | ◐ via prompt | ✅ custom commands | CI only |
+| Kiro | ✅ (auto-loads) | ✅ CLI custom agents | ◐ native spec mode | ✅ .kiro/hooks |
 | Anything else | Point it at AGENTS.md | via prompt | paste prompts | CI only |
 
 "CI only" is fine: the pre-commit hook + `pipeline/ci/` enforce protected paths, secret scanning, tests, and spec traceability regardless of which tool wrote the code.
