@@ -25,3 +25,5 @@ Every feature moves through these phases. A phase's exit gate must pass before t
 - No phase skipping, including "trivial" changes — trivial changes get trivial specs (a 5-line spec is fine; no spec is not).
 - Phases 1–3 may run in one session for small features, but each gate is still checked.
 - Costs are logged per phase where telemetry allows; budget breach behavior per `observability/cost-policy.md`.
+
+- Branching, commit conventions, PR flow, and deploy-from-GitHub: `pipeline/source-control.md`.

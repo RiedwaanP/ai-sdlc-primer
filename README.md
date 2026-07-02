@@ -16,7 +16,7 @@ One vendor-neutral core, thin per-harness adapters. The core (specs, standards, 
 | `prompts/` | Lifecycle prompts: spec, plan, tasks, implement, cost-report. Paste, alias, or register per adapter. |
 | `guardrails/` | Portable enforcement: protected-paths list, git pre-commit hook, policy doc. |
 | `adapters/` | Wiring guides: claude-code, github-copilot, cursor, codex-cli, gemini-cli, byok-gateway. |
-| `specs/`, `standards/`, `stacks/`, `pipeline/` | Same battle order as any spec-driven repo: templates, engineering/testing/security/design standards, stack packs, phase-gated playbook + CI. |
+| `specs/`, `standards/`, `stacks/`,  `pipeline/` | Same battle order as any spec-driven repo: templates, engineering/testing/security/design standards, stack packs, phase-gated playbook + CI. |
 | `observability/` | Provider-agnostic cost policy + telemetry options (gateway metering, cost log). |
 
 ## Quick start
